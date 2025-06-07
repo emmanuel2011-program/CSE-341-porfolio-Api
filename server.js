@@ -2,7 +2,6 @@ require('dotenv').config();
 const express = require('express');
 const session = require('express-session');
 const cors = require('cors');
-const db = require('./models');
 
 const port = process.env.PORT || 3000;
 const app = express();
@@ -26,7 +25,12 @@ app.get('/', (req, res) => {
 app.use('/', require('./routes'));
 
 // DB Connection and Server Start
-db.mongoose.connect(db.url)
+const db = require('./models');
+db.mongoose
+  .connect(db.url, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+  })
   .then(() => {
     app.listen(port, () => {
       console.log(`Server running on port ${port}`);
