@@ -97,20 +97,22 @@ module.exports.updateUser = async (req, res) => {
 };
 
 module.exports.deleteUser = async (req, res) => {
-  try {
-    const username = req.params.username;
-    if (!username) {
-      res.status(400).send({ message: 'Invalid Username Supplied' });
-      return;
-    }
-    User.deleteOne({ username: username }, function (err, result) {
-      if (err) {
-        res.status(500).json(err || 'Some error occurred while deleting the contact.');
-      } else {
-        res.status(204).send(result);
+    try {
+      const username = req.params.username;
+      if (!username) {
+        return res.status(400).send({ message: 'Invalid Username Supplied' });
       }
-    });
-  } catch (err) {
-    res.status(500).json(err || 'Some error occurred while deleting the contact.');
-  }
-};
+  
+      const result = await User.deleteOne({ username });
+  
+      if (result.deletedCount === 0) {
+        return res.status(404).send({ message: 'User not found' });
+      }
+  
+      return res.status(204).send(); // No content, successful delete
+    } catch (err) {
+      console.error('Delete error:', err); // Log error for debugging
+      return res.status(500).json({ message: 'Server error', error: err });
+    }
+  };
+  
