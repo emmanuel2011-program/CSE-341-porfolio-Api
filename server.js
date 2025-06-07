@@ -6,8 +6,31 @@ const cors = require('cors');
 const port = process.env.PORT || 3000;
 const app = express();
 
-// Middleware
-app.use(cors()); // <---- Add this line
+// List your allowed frontend URLs here:
+const allowedOrigins = [
+  'https://your-frontend-domain.com',  // <-- replace with your actual frontend URL
+  'http://localhost:3000'               // <-- local dev frontend, optional
+];
+
+// Middleware to log incoming origin (for debugging)
+app.use((req, res, next) => {
+  console.log('Incoming request origin:', req.headers.origin);
+  next();
+});
+
+// CORS setup to only allow your frontend(s)
+app.use(cors({
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like curl, Postman)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) === -1) {
+      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  },
+  credentials: true // if you use cookies or sessions
+}));
 
 app.use(express.json());
 
