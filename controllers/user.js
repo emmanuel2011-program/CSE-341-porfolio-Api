@@ -79,37 +79,50 @@ module.exports.updateUser = async (req, res) => {
   try {
     const username = req.params.username;
     if (!username) {
-      return res.status(400).send({ message: 'Invalid Username Supplied' });
+      return res.status(400).json({ message: 'Invalid Username Supplied' });
     }
 
     const password = req.body.password;
     const passwordCheck = passwordUtil.passwordPass(password);
     if (passwordCheck.error) {
-      return res.status(400).send({ message: passwordCheck.error });
+      return res.status(400).json({ message: passwordCheck.error });
     }
 
     User.findOne({ username: username }, function (err, user) {
-      if (err || !user) {
-        return res.status(404).send({ message: 'User not found' });
+      if (err) {
+        console.error('Error finding user:', err);
+        return res.status(500).json({ message: 'Database error', error: err });
       }
 
-      user.username = req.params.username;
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+
+      // Update user fields
       user.password = req.body.password;
       user.displayName = req.body.displayName;
       user.info = req.body.info;
       user.profile = req.body.profile;
 
-      user.save(function (err) {
+      user.save(function (err, updatedUser) {
         if (err) {
-          console.error('Error updating user:', err);
-          res.status(500).json({ message: 'Error updating user', error: err });
-        } else {
-          res.status(204).send();
+          console.error('Error saving updated user:', err);
+          return res.status(500).json({
+            message: 'Error updating user',
+            error: err.message || err,
+            details: err.errors || {}
+          });
         }
+
+        return res.status(200).json({ message: 'User updated successfully', user: updatedUser });
       });
     });
   } catch (err) {
-    res.status(500).json({ message: 'Internal server error', error: err });
+    console.error('Unexpected error in updateUser:', err);
+    res.status(500).json({
+      message: 'Internal server error',
+      error: err.message || err
+    });
   }
 };
 
