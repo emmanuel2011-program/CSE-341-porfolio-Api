@@ -1,18 +1,16 @@
 require('dotenv').config();
 const express = require('express');
 const session = require('express-session');
+const cors = require('cors');
 const db = require('./models');
 
 const port = process.env.PORT || 3000;
 const app = express();
 
 // Middleware
-app.use(express.json());
+app.use(cors()); // <---- Add this line
 
-app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  next();
-});
+app.use(express.json());
 
 app.use(session({
   secret: process.env.SESSION_SECRET || 'default_secret',
