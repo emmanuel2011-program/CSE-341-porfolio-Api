@@ -65,36 +65,48 @@ module.exports.getUser = (req, res) => {
 };
 
 module.exports.updateUser = async (req, res) => {
-  try {
-    const username = req.params.username;
-    if (!username) {
-      res.status(400).send({ message: 'Invalid Username Supplied' });
-      return;
-    }
-    const password = req.body.password;
-    const passwordCheck = passwordUtil.passwordPass(password);
-    if (passwordCheck.error) {
-      res.status(400).send({ message: passwordCheck.error });
-      return;
-    }
-    User.findOne({ username: username }, function (err, user) {
-      user.username = req.params.username;
-      user.password = req.body.password;
-      user.displayName = req.body.displayName;
-      user.info = req.body.info;
-      user.profile = req.body.profile;
-      user.save(function (err) {
+    try {
+      const username = req.params.username;
+  
+      if (!username) {
+        return res.status(400).send({ message: 'Invalid Username Supplied' });
+      }
+  
+      const password = req.body.password;
+      const passwordCheck = passwordUtil.passwordPass(password);
+  
+      if (passwordCheck.error) {
+        return res.status(400).send({ message: passwordCheck.error });
+      }
+  
+      User.findOne({ username: username }, function (err, user) {
         if (err) {
-          res.status(500).json(err || 'Some error occurred while updating the contact.');
-        } else {
-          res.status(204).send();
+          return res.status(500).json({ message: 'Database error', error: err });
         }
+  
+        if (!user) {
+          return res.status(404).send({ message: `User '${username}' not found.` });
+        }
+  
+        // Update user fields
+        user.password = req.body.password;
+        user.displayName = req.body.displayName;
+        user.info = req.body.info;
+        user.profile = req.body.profile;
+  
+        user.save(function (err) {
+          if (err) {
+            return res.status(500).json({ message: 'Error saving user', error: err });
+          } else {
+            return res.status(200).send({ message: 'User updated successfully' });
+          }
+        });
       });
-    });
-  } catch (err) {
-    res.status(500).json(err);
-  }
-};
+    } catch (err) {
+      return res.status(500).json({ message: 'Unexpected server error', error: err });
+    }
+  };
+  
 
 module.exports.deleteUser = async (req, res) => {
     try {
