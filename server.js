@@ -34,10 +34,7 @@ app.use('/', require('./routes'));
 // DB Connection and Server Start
 const db = require('./models');
 db.mongoose
-  .connect(db.url, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-  })
+  .connect(db.url)
   .then(() => {
     app.listen(port, () => {
       console.log(`Server running on port ${port}`);
