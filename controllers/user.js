@@ -88,35 +88,22 @@ module.exports.updateUser = async (req, res) => {
       return res.status(400).json({ message: passwordCheck.error });
     }
 
-    User.findOne({ username: username }, function (err, user) {
-      if (err) {
-        console.error('Error finding user:', err);
-        return res.status(500).json({ message: 'Database error', error: err });
-      }
+    // Use async/await instead of callback
+    const user = await User.findOne({ username: username });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
 
-      if (!user) {
-        return res.status(404).json({ message: 'User not found' });
-      }
+    // Update fields
+    user.password = req.body.password;
+    user.displayName = req.body.displayName;
+    user.info = req.body.info;
+    user.profile = req.body.profile;
 
-      // Update user fields
-      user.password = req.body.password;
-      user.displayName = req.body.displayName;
-      user.info = req.body.info;
-      user.profile = req.body.profile;
+    // Save updated user
+    const updatedUser = await user.save();
 
-      user.save(function (err, updatedUser) {
-        if (err) {
-          console.error('Error saving updated user:', err);
-          return res.status(500).json({
-            message: 'Error updating user',
-            error: err.message || err,
-            details: err.errors || {}
-          });
-        }
-
-        return res.status(200).json({ message: 'User updated successfully', user: updatedUser });
-      });
-    });
+    return res.status(200).json({ message: 'User updated successfully', user: updatedUser });
   } catch (err) {
     console.error('Unexpected error in updateUser:', err);
     res.status(500).json({
@@ -125,6 +112,7 @@ module.exports.updateUser = async (req, res) => {
     });
   }
 };
+
 
 // No major change, added better error output
 module.exports.deleteUser = async (req, res) => {
