@@ -5,14 +5,14 @@
       "version": "1.0.0",
       "title": "Portfolio Builder",
       "contact": {
-        "email": "eokoye2@byui.edu"
+        "email": "okoyee61@gmail.com"
       },
       "license": {
         "name": "Apache 2.0",
         "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
       }
     },
-    "host": "emmanuel-Okoye-builder.herokuapp.com",
+    "host": "https://porfolio-kkg6.onrender.com",
     "basePath": "/",
     "tags": [
       {
