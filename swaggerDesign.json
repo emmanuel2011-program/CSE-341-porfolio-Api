@@ -329,8 +329,9 @@
         "required": ["password", "username"],
         "properties": {
           "_id": {
-            "type": "integer",
-            "format": "string"
+            "type": "string",
+            "format": "^[a-fA-F0-9]{24}$",
+            "description": "MongoDB ObjectId"
           },
           "username": {
             "type": "string"
