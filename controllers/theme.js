@@ -22,10 +22,11 @@ exports.createTheme = (req, res) => {
       });
     });
 };
+
 // Get all themes
-module.exports.getAll = (req, res) => {
+exports.getAllThemes = (req, res) => { // <-- CHANGE THIS LINE (from module.exports.getAll)
   try {
-    theme.find({})
+    Theme.find({}) // Corrected: 'Theme' (model name) instead of 'theme' (undefined variable)
       .then((data) => {
         res.status(200).send(data);
       })
@@ -40,6 +41,8 @@ module.exports.getAll = (req, res) => {
     res.status(500).json({ message: 'Internal server error', error: err });
   }
 };
+
+// ... (rest of your controller file)
 // Get a theme by themeName
 exports.getTheme = (req, res) => {
   const themeName = req.params.themeName;
