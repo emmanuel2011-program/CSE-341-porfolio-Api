@@ -22,7 +22,24 @@ exports.createTheme = (req, res) => {
       });
     });
 };
-
+// Get all themes
+module.exports.getAll = (req, res) => {
+  try {
+    theme.find({})
+      .then((data) => {
+        res.status(200).send(data);
+      })
+      .catch((err) => {
+        console.error('Fetch all themes error:', err);
+        res.status(500).send({
+          message: 'Some error occurred while retrieving themes.',
+          error: err.message
+        });
+      });
+  } catch (err) {
+    res.status(500).json({ message: 'Internal server error', error: err });
+  }
+};
 // Get a theme by themeName
 exports.getTheme = (req, res) => {
   const themeName = req.params.themeName;
