@@ -413,33 +413,8 @@
             "description": "Error occurred"
           }
         }
-      },
-      "post": {
-        "tags": ["user"],
-        "summary": "Create user",
-        "description": "This is for when a user creates an account",
-        "operationId": "createUser",
-        "produces": ["application/json"],
-        "parameters": [
-          {
-            "in": "body",
-            "name": "body",
-            "description": "Created user object",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/Credentials"
-            }
-          }
-        ],
-        "responses": {
-          "default": {
-            "description": "A User object",
-            "schema": {
-              "$ref": "#/definitions/User"
-            }
-          }
-        }
       }
+      
     }
   },
   "securityDefinitions": {
