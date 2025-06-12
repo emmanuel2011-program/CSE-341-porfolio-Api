@@ -230,7 +230,10 @@
             }
           },
           "400": {
-            "description": "Invalid theme name value"
+            "description": "Invalid user name value"
+          },
+          "500": {
+            "description": "Error occurred while creating the user"
           }
         }
       }
