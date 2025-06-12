@@ -194,50 +194,7 @@
         }
       }
     },
-    "/user": {
-      "post": {
-        "tags": ["user"],
-        "summary": "Create user",
-        "description": "This is for when a user creates an account.",
-        "operationId": "createUser",
-        "produces": ["application/json"],
-        "parameters": [
-          {
-            "in": "body",
-            "name": "body",
-            "description": "Created user object",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/Credentials"
-            }
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": "successfully created user",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "id": {
-                  "type": "integer",
-                  "format": "int64"
-                },
-                "name": {
-                  "type": "string",
-                  "example": "Nike Theme"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid user name value"
-          },
-          "500": {
-            "description": "Error occurred while creating the user"
-          }
-        }
-      }
-    },
+      
     "/user/login": {
       "get": {
         "tags": ["Not Yet Implemented"],
@@ -413,10 +370,52 @@
             "description": "Error occurred"
           }
         }
+      },
+      "post": {
+        "tags": ["user"],
+        "summary": "Create user",
+        "description": "This is for when a user creates an account.",
+        "operationId": "createUser",
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Created user object",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Credentials"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "successfully created user",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                "name": {
+                  "type": "string",
+                  "example": "Nike Theme"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid user name value"
+          },
+          "500": {
+            "description": "Error occurred while creating the user"
+          }
+        }
       }
-      
     }
   },
+  
   "securityDefinitions": {
     "petstore_auth": {
       "type": "oauth2",
