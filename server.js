@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const session = require('express-session');
 const passport = require('./auth/passport'); // your passport config
+const githubStrategy = require('./auth/github.strategy'); // your GitHub strategy config
 
 const port = process.env.PORT || 3000;
 const app = express();
@@ -29,6 +30,19 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
+
+passport.use(githubStrategy({
+clientId: process.env.GITHUB_CLIENT_ID,
+clientSecret: process.env.GITHUB_CLIENT_SECRET,
+clientLocalURI: process.env.CALLBACK_URI 
+},
+function(accessToken, refreshToken, profile, done) {
+  // Here you would typically find or create a user in your database
+  // For simplicity, we will just return the profile
+  return done(null, profile);
+}
+));
+// Passport Configuration 
 // Routes
 app.get('/', (req, res) => {
   res.send('Welcome to the API!');
