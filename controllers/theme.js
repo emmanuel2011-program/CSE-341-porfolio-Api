@@ -2,107 +2,102 @@ const db = require('../models');
 const Theme = db.theme;
 
 // Create a new theme
-exports.createTheme = (req, res) => {
+exports.createTheme = async (req, res) => {
   if (!req.body.themeName) {
     return res.status(400).send({ message: "Theme name cannot be empty" });
   }
 
-  const theme = new Theme({
-    themeName: req.body.themeName,
-    color: req.body.color,
-    layout: req.body.layout
-  });
-
-  theme.save()
-    .then(data => res.status(201).send(data))
-    .catch(err => {
-      res.status(500).send({
-        message: "Error occurred while creating the theme.",
-        error: err
-      });
+  try {
+    const theme = new Theme({
+      themeName: req.body.themeName,
+      color: req.body.color,
+      layout: req.body.layout
     });
+
+    const data = await theme.save();
+    res.status(201).send(data);
+  } catch (err) {
+    res.status(500).send({
+      message: "Error occurred while creating the theme.",
+      error: err.message
+    });
+  }
 };
 
 // Get all themes
-exports.getAllThemes = (req, res) => { // <-- CHANGE THIS LINE (from module.exports.getAll)
+exports.getAllThemes = async (req, res) => {
   try {
-    Theme.find({}) // Corrected: 'Theme' (model name) instead of 'theme' (undefined variable)
-      .then((data) => {
-        res.status(200).send(data);
-      })
-      .catch((err) => {
-        console.error('Fetch all themes error:', err);
-        res.status(500).send({
-          message: 'Some error occurred while retrieving themes.',
-          error: err.message
-        });
-      });
+    const data = await Theme.find({});
+    res.status(200).send(data);
   } catch (err) {
-    res.status(500).json({ message: 'Internal server error', error: err });
+    console.error('Fetch all themes error:', err);
+    res.status(500).send({
+      message: 'Some error occurred while retrieving themes.',
+      error: err.message
+    });
   }
 };
 
-// ... (rest of your controller file)
 // Get a theme by themeName
-exports.getTheme = (req, res) => {
+exports.getTheme = async (req, res) => {
   const themeName = req.params.themeName;
 
-  Theme.find({ themeName: themeName })
-    .then(data => {
-      if (!data || data.length === 0) {
-        res.status(404).send({ message: 'Not found theme with name: ' + themeName });
-      } else {
-        res.send(data[0]);
-      }
-    })
-    .catch(err => {
-      res.status(500).send({
-        message: 'Error retrieving theme with themeName=' + themeName,
-        error: err
-      });
+  try {
+    const data = await Theme.find({ themeName: themeName });
+
+    if (!data || data.length === 0) {
+      return res.status(404).send({ message: 'Not found theme with name: ' + themeName });
+    }
+
+    res.send(data[0]);
+  } catch (err) {
+    res.status(500).send({
+      message: 'Error retrieving theme with themeName=' + themeName,
+      error: err.message
     });
+  }
 };
 
 // Update a theme by themeName
-exports.updateTheme = (req, res) => {
+exports.updateTheme = async (req, res) => {
   const themeName = req.params.themeName;
 
-  if (!req.body) {
+  if (!req.body || Object.keys(req.body).length === 0) {
     return res.status(400).send({ message: "Update data cannot be empty" });
   }
 
-  Theme.findOneAndUpdate({ themeName: themeName }, req.body, { new: true })
-    .then(data => {
-      if (!data) {
-        res.status(404).send({ message: "Theme not found with name: " + themeName });
-      } else {
-        res.send(data);
-      }
-    })
-    .catch(err => {
-      res.status(500).send({
-        message: "Error updating theme with name=" + themeName,
-        error: err
-      });
+  try {
+    const data = await Theme.findOneAndUpdate({ themeName: themeName }, req.body, { new: true });
+
+    if (!data) {
+      return res.status(404).send({ message: "Theme not found with name: " + themeName });
+    }
+
+    res.send(data);
+  } catch (err) {
+    res.status(500).send({
+      message: "Error updating theme with name=" + themeName,
+      error: err.message
     });
+  }
 };
 
 // Delete a theme by themeName
-exports.deleteTheme = (req, res) => {
+exports.deleteTheme = async (req, res) => {
   const themeName = req.params.themeName;
 
-  Theme.findOneAndDelete({ themeName: themeName })
-    .then(data => {
-      if (!data) {
-        res.status(404).send({ message: "Theme not found with name: " + themeName });
-      } else {
-        res.send({ message: "Theme was deleted successfully." });
-      }
-    })
-    .catch(err => {
-      res.status(500).send({
-        message: "Could not delete theme with name=" + themeName,
-        error: err
-      });
+  try {
+    const data = await Theme.findOneAndDelete({ themeName: themeName });
+
+    if (!data) {
+      return res.status(404).send({ message: "Theme not found with name: " + themeName });
+    }
+
+    res.send({ message: "Theme was deleted successfully." });
+  } catch (err) {
+    res.status(500).send({
+      message: "Could not delete theme with name=" + themeName,
+      error: err.message
     });
+  }
 };
