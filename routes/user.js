@@ -14,3 +14,11 @@ router.put('/:username', passport.authenticate('session'), userController.update
 router.delete('/:username', passport.authenticate('session'), userController.deleteUser);
 
 module.exports = router;
+
+
+
+
+
+
+
+
