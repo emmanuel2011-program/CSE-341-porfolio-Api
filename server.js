@@ -31,17 +31,9 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 
-passport.use(githubStrategy({
-clientId: process.env.GITHUB_CLIENT_ID,
-clientSecret: process.env.GITHUB_CLIENT_SECRET,
-clientLocalURI: process.env.CALLBACK_URI 
-},
-function(accessToken, refreshToken, profile, done) {
-  // Here you would typically find or create a user in your database
-  // For simplicity, we will just return the profile
-  return done(null, profile);
-}
-));
+const githubStrategy = require('./auth/github.strategy');
+passport.use(githubStrategy);
+
 // Passport Configuration 
 // Routes
 app.get('/', (req, res) => {
