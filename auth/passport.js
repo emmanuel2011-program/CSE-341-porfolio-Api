@@ -1,14 +1,14 @@
 const passport = require('passport');
-const GoogleStrategy = require('passport-google-oauth20').Strategy;
+const GitHubStrategy = require('passport-github2').Strategy;
 const db = require('../models');
 const User = db.user;
 
 passport.use(
-  new GoogleStrategy(
+  new GitHubStrategy(
     {
       clientID: process.env.GITHUB_CLIENT_ID,
       clientSecret: process.env.GITHUB_CLIENT_SECRET,
-      callbackURL: '/auth/google/callback'
+      callbackURL: process.env.CALLBACK_URI || '/auth/github/callback'
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
@@ -20,6 +20,7 @@ passport.use(
           username: profile.id,
           displayName: profile.displayName,
           email: profile.emails[0].value
+          
         });
         await newUser.save();
         done(null, newUser);
