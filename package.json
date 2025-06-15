@@ -16,6 +16,8 @@
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
     "express-session": "^1.18.1",
+    "express-validator": "^7.2.1",
+    "joi": "^17.13.3",
     "joi-password-complexity": "^5.2.0",
     "mongoose": "^8.15.1",
     "passport": "^0.7.0",

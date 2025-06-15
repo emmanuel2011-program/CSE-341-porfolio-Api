@@ -1,11 +1,8 @@
-const express = require('express');
+const express = require('express')
 const router = express.Router();
-const passport = require('passport');
 
 const themeController = require('../controllers/theme');
-
-// Authentication middleware
-const isAuthenticated = passport.authenticate('session', { session: true });
+const {isAuthenticated} = require('../middleware/auth'); // Assuming you have an auth middleware
 
 // Public route (optional: make GET all or GET by name public)
 router.get('/', themeController.getAllThemes);
