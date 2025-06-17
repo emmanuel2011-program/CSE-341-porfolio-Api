@@ -8,7 +8,9 @@ router.get('/github', passport.authenticate('github', { scope: ['user:email'] })
 // Callback after GitHub login
 router.get(
   '/github/callback',
-  passport.authenticate('github', { failureRedirect: '/login-failure' }),
+  passport.authenticate('github', { failureRedirect: '/login-failure',
+    successRedirect: '/user/login/success' 
+  }),
   (req, res) => {
     req.session.save(() => {
     // Successful authentication
