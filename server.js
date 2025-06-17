@@ -36,14 +36,14 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Middleware for logging session and user (KEEP THIS, it's helpful)
+// Middleware for logging session and user 
 app.use((req, res, next) => {
   console.log('🔍 Session:', req.session);
   console.log('🔍 User:', req.user); // req.user is populated by passport.deserializeUser
   next();
 });
 
-// --- Swagger UI setup - MUST be before any general authentication middleware ---
+// --- Swagger UI setup --
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // --- Public routes ---
@@ -63,10 +63,10 @@ app.get('/user/login', (req, res) => {
 app.get('/user/logout', (req, res, next) => {
   // Passport's req.logout requires a callback in newer versions
   req.logout(function(err) {
-    if (err) { return next(err); } // Handle error if logout fails
-    req.session.destroy(() => { // Destroy the session on the server
-      res.clearCookie('connect.sid'); // Clear the session cookie from the client
-      res.redirect('/'); // Redirect to homepage or login page
+    if (err) { return next(err); } 
+    req.session.destroy(() => { 
+      res.clearCookie('connect.sid'); 
+      res.redirect('/'); 
     });
   });
 });
@@ -79,15 +79,14 @@ app.get('/check-session', (req, res) => {
   });
 });
 
-// --- Passport Serialization/Deserialization ---
-// These functions define how user data is stored in the session
+
 passport.serializeUser((user, done) => {
-  // `user` here is the `profile` object returned by GitHubStrategy
-  done(null, user); // Store the entire profile object in the session
+  
+  done(null, user); 
 });
 passport.deserializeUser((obj, done) => {
-  // `obj` here is the object stored by serializeUser
-  done(null, obj); // Retrieve the user object from the session
+  
+  done(null, obj); 
 });
 
 // --- GitHub OAuth Strategy ---
@@ -99,9 +98,7 @@ passport.use(
       callbackURL: process.env.GITHUB_CALLBACK_URI,
     },
     function (accessToken, refreshToken, profile, done) {
-      // In a real app, you'd typically find or create a user in your database here
-      // based on profile.id or profile.username, then pass your internal user object to done.
-      // For this setup, we're just passing the GitHub profile directly.
+     
       return done(null, profile);
     }
   )
@@ -109,27 +106,23 @@ passport.use(
 
 // --- Protected profile route (uses the imported isAuthenticated middleware) ---
 app.get('/profile', isAuthenticated, (req, res) => {
-  const user = req.user; // `req.user` is available because passport.deserializeUser populates it
+  const user = req.user; 
   res.status(200).json({
     message: 'Welcome to your profile!',
     user: {
-      id: user.id, // GitHub profile ID
-      username: user.username, // GitHub username
-      displayName: user.displayName, // GitHub display name
-      profileUrl: user.profileUrl, // Link to GitHub profile
-      photos: user.photos, // Array of photo objects
+      id: user.id, 
+      username: user.username, 
+      displayName: user.displayName, 
+      profileUrl: user.profileUrl, 
+      photos: user.photos, 
     },
   });
 });
 
-// --- IMPORTANT: Mount your main router here ---
-// This line connects all the routes defined in routes/index.js
-// (which includes your /user and /theme routes) to your Express app.
+
 app.use('/', require('./routes'));
 
-// --- Authentication-specific routes (e.g., GitHub callback) ---
-// This is typically where your '/auth/github/callback' route would be defined
-// within routes/auth.js.
+
 app.use('/auth', authRoutes);
 
 
