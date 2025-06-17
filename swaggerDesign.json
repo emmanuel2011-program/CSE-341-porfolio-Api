@@ -420,7 +420,7 @@
     "cookieAuth": {
       "type": "apikey",
       "in": "cookie",
-      "name": "connect.id"
+      "name": "connect.sid"
     }
   },
   "security": [
