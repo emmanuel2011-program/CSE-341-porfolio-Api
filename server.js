@@ -7,12 +7,12 @@ const session = require('express-session');
 const passport = require('passport');
 const GitHubStrategy = require('passport-github2').Strategy;
 const cors = require('cors');
-const authRoutes = require('./routes/auth'); // Keep this if it contains specific GitHub OAuth callback routes
+const authRoutes = require('./routes/auth'); 
 const swaggerUi = require('swagger-ui-express');
 const swaggerDocument = require('./swaggerDesign.json');
 
 // --- IMPORTANT: Import the isAuthenticated middleware ---
-const { isAuthenticated } = require('./middleware/auth'); // Assuming middleware/auth.js exists
+const { isAuthenticated } = require('./middleware/auth'); 
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -27,7 +27,7 @@ app.use(
     resave: false,
     saveUninitialized: true,
     cookie: {
-      secure: process.env.NODE_ENV === 'production', // true for https in production
+      secure: process.env.NODE_ENV === 'production', 
       httpOnly: true,
       maxAge: 24 * 60 * 60 * 1000 // 24 hours
     }
@@ -39,7 +39,7 @@ app.use(passport.session());
 // Middleware for logging session and user 
 app.use((req, res, next) => {
   console.log('🔍 Session:', req.session);
-  console.log('🔍 User:', req.user); // req.user is populated by passport.deserializeUser
+  console.log('🔍 User:', req.user); 
   next();
 });
 
@@ -48,7 +48,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // --- Public routes ---
 app.get('/', (req, res) => {
-  const user = req.session?.passport?.user; // Passport stores user info under req.session.passport.user
+  const user = req.session?.passport?.user; 
   if (user) {
     res.send(`Logged in as ${user.displayName || user.username || user.id}`);
   } else {
@@ -57,11 +57,11 @@ app.get('/', (req, res) => {
 });
 
 app.get('/user/login', (req, res) => {
-  res.redirect('/auth/github'); // This redirects to your GitHub OAuth initiation
+  res.redirect('/auth/github'); 
 });
 
 app.get('/user/logout', (req, res, next) => {
-  // Passport's req.logout requires a callback in newer versions
+ 
   req.logout(function(err) {
     if (err) { return next(err); } 
     req.session.destroy(() => { 
@@ -74,7 +74,7 @@ app.get('/user/logout', (req, res, next) => {
 app.get('/check-session', (req, res) => {
   res.json({
     authenticated: req.isAuthenticated(),
-    user: req.user, // `req.user` contains the deserialized user object if authenticated
+    user: req.user, 
     session: req.session
   });
 });
@@ -104,7 +104,7 @@ passport.use(
   )
 );
 
-// --- Protected profile route (uses the imported isAuthenticated middleware) ---
+// --- Protected profile route 
 app.get('/profile', isAuthenticated, (req, res) => {
   const user = req.user; 
   res.status(200).json({
