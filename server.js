@@ -1,7 +1,8 @@
+// server.js
 require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
-const db = require('./models'); // Assuming this correctly loads your Mongoose connection/models
+const db = require('./models');
 const session = require('express-session');
 const passport = require('passport');
 const GitHubStrategy = require('passport-github2').Strategy;
@@ -9,10 +10,6 @@ const cors = require('cors');
 const authRoutes = require('./routes/auth'); 
 const swaggerUi = require('swagger-ui-express');
 const swaggerDocument = require('./swaggerDesign.json');
-
-// --- Import necessary custom modules for Passport's deserializeUser
-const mongoDb = require('./DB/connect.js'); // Assuming this provides mongoDb.getDb()
-const userController = require('./controllers/userController.js'); // Assuming this provides createOrFindUser
 
 // --- IMPORTANT: Import the isAuthenticated middleware ---
 const { isAuthenticated } = require('./middleware/auth'); 
@@ -23,53 +20,26 @@ const port = process.env.PORT || 3000;
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
-// --- BEGIN: Refined CORS Configuration ---
-// Set origin to your Render URL for production, or allow all for development.
-// Ensure credentials: true is set to allow session cookies.
-const allowedOrigins = [
-  'http://localhost:3000', // For local development
-  'https://porfolio-kkg6.onrender.com' // Your Render deployed API URL
-  // Add any frontend URLs here if your frontend is hosted separately
-];
-
-app.use(cors({
-  origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps, curl, or same-origin requests from browsers)
-    if (!origin) return callback(null, true); 
-    if (allowedOrigins.indexOf(origin) === -1) {
-      const msg = `The CORS policy for this site does not allow access from the specified Origin: ${origin}.`;
-      return callback(new Error(msg), false);
-    }
-    return callback(null, true);
-  },
-  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-  credentials: true, // Crucial for allowing session cookies to be sent cross-origin
-  allowedHeaders: ['Content-Type', 'Authorization'],
-}));
-// --- END: Refined CORS Configuration ---
-
-
+app.use(cors());
 app.use(
   session({
-    secret: process.env.SESSION_SECRET || 'a_very_strong_fallback_secret_for_dev_only', // IMPORTANT: Use a strong, unique, long secret from .env!
-    resave: false, // Don't save session if unmodified
-    saveUninitialized: false, // Don't save empty sessions
+    secret: process.env.SESSION_SECRET || 'your_fallback_secret_here', // IMPORTANT: Use a strong secret from .env!
+    resave: false,
+    saveUninitialized: true,
     cookie: {
-      secure: process.env.NODE_ENV === 'production', // Set to true in production (Render handles HTTPS)
-      httpOnly: true, // Prevents client-side JS from accessing the cookie
+      secure: process.env.NODE_ENV === 'production', 
+      httpOnly: true,
       maxAge: 24 * 60 * 60 * 1000 // 24 hours
-      // domain: '.yourdomain.com' // Only needed if your API and frontend are on different subdomains of the same parent domain
     }
   })
 );
 app.use(passport.initialize());
-app.use(passport.session()); // This middleware depends on `passport.serializeUser` and `passport.deserializeUser`
+app.use(passport.session());
 
-// Middleware for logging session and user (KEEP THIS FOR DEBUGGING)
+// Middleware for logging session and user 
 app.use((req, res, next) => {
-  console.log('🔍 Request received. Session ID:', req.sessionID);
-  console.log('🔍 Session Content:', req.session);
-  console.log('🔍 User (after Passport deserialize):', req.user); // THIS SHOULD NOW SHOW YOUR DB USER OBJECT
+  console.log('🔍 Session:', req.session);
+  console.log('🔍 User:', req.user); 
   next();
 });
 
@@ -78,75 +48,46 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // --- Public routes ---
 app.get('/', (req, res) => {
-  const user = req.user; // Use req.user which is populated by deserializeUser
+  const user = req.session?.passport?.user; 
   if (user) {
-    res.send(`Logged in as ${user.displayName || user.username || user.id}. Your role is: ${user.position || 'N/A'}`);
+    res.send(`Logged in as ${user.displayName || user.username || user.id}`);
   } else {
-    res.send('Not logged in. Go to /auth/github to authenticate with GitHub.');
+    res.send('Not logged in. Go to /user/login to authenticate with GitHub.');
   }
 });
 
 app.get('/user/login', (req, res) => {
-  // This route should trigger the GitHub OAuth flow
   res.redirect('/auth/github'); 
 });
 
 app.get('/user/logout', (req, res, next) => {
-  req.logout(function(err) { // Passport's logout method
+ 
+  req.logout(function(err) {
     if (err) { return next(err); } 
-    req.session.destroy(() => { // Destroy the session in the store
-      res.clearCookie('connect.sid'); // Clear the session cookie from the browser
-      res.redirect('/'); // Redirect to homepage
+    req.session.destroy(() => { 
+      res.clearCookie('connect.sid'); 
+      res.redirect('/'); 
     });
   });
 });
 
 app.get('/check-session', (req, res) => {
   res.json({
-    authenticated: req.isAuthenticated(), // Passport's helper
-    user: req.user, // Will be populated if authenticated and deserialized
-    session: req.session // Raw session object
+    authenticated: req.isAuthenticated(),
+    user: req.user, 
+    session: req.session
   });
 });
 
-// --- CRITICAL PASSPORT SERIALIZE/DESERIALIZE LOGIC ---
-// This section dictates how user data is stored in and retrieved from the session.
 
-// serializeUser: What minimal, unique user data to store in the session.
-// 'user' here is the object that was passed to `done()` in the GitHubStrategy callback.
-// It *must* be the user object retrieved/created from YOUR database, not the raw GitHub profile.
 passport.serializeUser((user, done) => {
-    // Store a unique identifier from your database user object (e.g., username or MongoDB _id)
-    // Assuming 'user' here is your Mongoose/MongoDB document.
-    done(null, user.username); // Or user._id.toString() if you prefer using MongoDB's _id
+  
+  done(null, user); 
 });
-
-// deserializeUser: How to retrieve the full user object from your database for each subsequent request.
-// 'username' here is the data that was stored by serializeUser.
-passport.deserializeUser(async (username, done) => {
-    try {
-        // Retrieve your database connection instance.
-        const dbInstance = mongoDb.getDb(); 
-        
-        // Find the full user document in YOUR MongoDB 'User' collection using the serialized identifier.
-        // Assuming your 'User' collection stores 'username' as the unique identifier.
-        const user = await dbInstance.collection('User').findOne({ username: username });
-
-        if (user) {
-            // Attach the full user object (including 'position' or 'role') to req.user.
-            // This is what allows req.user.position to be available for RBAC.
-            done(null, user); 
-        } else {
-            // If the user's record is no longer in the DB, it indicates a problem or deleted account.
-            console.warn(`User ${username} not found in database during deserialization. Clearing session.`);
-            done(new Error('User record not found.'), null); // Passport will clear the session
-        }
-    } catch (err) {
-        console.error('Error deserializing user:', err);
-        done(err, null); // Pass the error to Passport
-    }
+passport.deserializeUser((obj, done) => {
+  
+  done(null, obj); 
 });
-
 
 // --- GitHub OAuth Strategy ---
 passport.use(
@@ -154,73 +95,45 @@ passport.use(
     {
       clientID: process.env.GITHUB_CLIENT_ID,
       clientSecret: process.env.GITHUB_CLIENT_SECRET,
-      callbackURL: process.env.GITHUB_CALLBACK_URI, // This needs to be correctly set on Render env vars AND GitHub OAuth App!
+      callbackURL: process.env.GITHUB_CALLBACK_URI,
     },
-    async function (accessToken, refreshToken, profile, done) {
-      // This is the first point after GitHub authentication where you get the 'profile' from GitHub.
-      // You MUST now find or create this user in YOUR OWN database.
-      try {
-        // userController.createOrFindUser should:
-        // 1. Look up user by profile.username (or profile.id) in YOUR database.
-        // 2. If user exists, return that database user object.
-        // 3. If user doesn't exist, create a new user in your database
-        //    (e.g., with username, default position like 'User', and other profile details from 'profile')
-        //    and then return that newly created database user object.
-        // IMPORTANT: The 'user' object returned by createOrFindUser MUST be your database user document,
-        // which contains your custom fields like 'position' or 'role'.
-        const user = await userController.createOrFindUser(profile);
-        return done(null, user); // Pass the user object from YOUR DATABASE to Passport's serializeUser
-      } catch (err) {
-        console.error('Error in GitHubStrategy callback (createOrFindUser):', err);
-        return done(err, null); // Pass the error to Passport
-      }
+    function (accessToken, refreshToken, profile, done) {
+     
+      return done(null, profile);
     }
   )
 );
 
-// --- Protected profile route (example of using isAuthenticated) ---
+// --- Protected profile route 
 app.get('/profile', isAuthenticated, (req, res) => {
-  const user = req.user; // Now, req.user should correctly contain your database user object
+  const user = req.user; 
   res.status(200).json({
     message: 'Welcome to your profile!',
     user: {
-      id: user.id || user._id, // May be GitHub ID or MongoDB _id. Use user._id for your DB doc.
+      id: user.id, 
       username: user.username, 
       displayName: user.displayName, 
       profileUrl: user.profileUrl, 
       photos: user.photos, 
-      position: user.position || 'N/A' // This should now correctly show the user's role/position
     },
   });
 });
 
-// --- Main application routes ---
-app.use('/', require('./routes')); 
-app.use('/auth', authRoutes); // Your specific GitHub authentication routes (like /auth/github)
+
+app.use('/', require('./routes'));
+
+
+app.use('/auth', authRoutes);
 
 
 // --- Database connection and server start ---
-// Ensure both Mongoose (db.mongoose.connect) and raw MongoDB driver (mongoDb.initDb)
-// are connected if your application uses both.
-db.mongoose.connect(db.url) // Connects Mongoose (e.g., if you have Mongoose models)
+db.mongoose.connect(db.url)
   .then(() => {
-    console.log('Mongoose connected successfully!');
-    // If you use mongoDb.getDb().collection(...) in your controllers (e.g., for Basketball/Volleyball),
-    // you MUST initialize that connection as well.
-    mongoDb.initDb((err) => { 
-        if (err) {
-            console.error('Failed to initialize raw MongoDB connection:', err);
-            process.exit(1); // Exit if critical connection fails
-        } else {
-            console.log('Raw MongoDB connection initialized successfully.');
-            // Start the server ONLY after ALL necessary database connections are ready
-            app.listen(port, () => {
-                console.log(`Server running on port ${port}`);
-            });
-        }
+    app.listen(port, () => {
+      console.log(`Server running on port ${port}`);
     });
   })
   .catch((err) => {
-    console.error('Cannot connect to the database (Mongoose/MongoDB Atlas)!', err);
-    process.exit(1); // Exit if Mongoose connection fails
+    console.error('Cannot connect to the database!', err);
+    process.exit(1);
   });
