@@ -134,3 +134,37 @@ module.exports.deleteUser = async (req, res) => {
     return res.status(500).json({ message: 'Server error', error: err });
   }
 };
+module.exports.createOrFindUser = async (githubProfile) => {
+  try {
+    const username = githubProfile.username;
+
+    let user = await User.findOne({ username });
+
+    if (!user) {
+      // If user doesn't exist, create a new one from GitHub profile
+      const newUser = new User({
+        username: username,
+        displayName: githubProfile.displayName || '',
+        profileUrl: githubProfile.profileUrl || '',
+        photos: githubProfile.photos || [],
+        info: {
+          email: githubProfile.emails?.[0]?.value || '',
+          profileIsPublic: true,
+          openToNewOpportunities: true,
+          theme_name: 'default',
+        },
+        createdAt: new Date()
+      });
+
+      user = await newUser.save();
+      console.log('✅ New GitHub user created:', user.username);
+    } else {
+      console.log('✅ Existing user logged in:', user.username);
+    }
+
+    return user;
+  } catch (err) {
+    console.error('❌ Error in createOrFindUser:', err);
+    throw err;
+  }
+};

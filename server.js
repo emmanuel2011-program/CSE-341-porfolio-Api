@@ -160,14 +160,7 @@ passport.use(
       // This is the first point after GitHub authentication where you get the 'profile' from GitHub.
       // You MUST now find or create this user in YOUR OWN database.
       try {
-        // userController.createOrFindUser should:
-        // 1. Look up user by profile.username (or profile.id) in YOUR database.
-        // 2. If user exists, return that database user object.
-        // 3. If user doesn't exist, create a new user in your database
-        //    (e.g., with username, default position like 'User', and other profile details from 'profile')
-        //    and then return that newly created database user object.
-        // IMPORTANT: The 'user' object returned by createOrFindUser MUST be your database user document,
-        // which contains your custom fields like 'position' or 'role'.
+        
         const user = await userController.createOrFindUser(profile);
         return done(null, user); // Pass the user object from YOUR DATABASE to Passport's serializeUser
       } catch (err) {
