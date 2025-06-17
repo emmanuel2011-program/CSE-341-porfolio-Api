@@ -23,13 +23,11 @@ const port = process.env.PORT || 3000;
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
-// --- BEGIN: Refined CORS Configuration ---
-// Set origin to your Render URL for production, or allow all for development.
-// Ensure credentials: true is set to allow session cookies.
+
 const allowedOrigins = [
   'http://localhost:3000', // For local development
   'https://porfolio-kkg6.onrender.com' // Your Render deployed API URL
-  // Add any frontend URLs here if your frontend is hosted separately
+  
 ];
 
 app.use(cors({
@@ -109,32 +107,23 @@ app.get('/check-session', (req, res) => {
   });
 });
 
-// --- CRITICAL PASSPORT SERIALIZE/DESERIALIZE LOGIC ---
-// This section dictates how user data is stored in and retrieved from the session.
 
-// serializeUser: What minimal, unique user data to store in the session.
-// 'user' here is the object that was passed to `done()` in the GitHubStrategy callback.
-// It *must* be the user object retrieved/created from YOUR database, not the raw GitHub profile.
 passport.serializeUser((user, done) => {
-    // Store a unique identifier from your database user object (e.g., username or MongoDB _id)
-    // Assuming 'user' here is your Mongoose/MongoDB document.
+    
     done(null, user.username); // Or user._id.toString() if you prefer using MongoDB's _id
 });
 
-// deserializeUser: How to retrieve the full user object from your database for each subsequent request.
-// 'username' here is the data that was stored by serializeUser.
+// d
 passport.deserializeUser(async (username, done) => {
     try {
         // Retrieve your database connection instance.
         const dbInstance = mongoDb.getDb(); 
         
-        // Find the full user document in YOUR MongoDB 'User' collection using the serialized identifier.
-        // Assuming your 'User' collection stores 'username' as the unique identifier.
+        
         const user = await dbInstance.collection('User').findOne({ username: username });
 
         if (user) {
-            // Attach the full user object (including 'position' or 'role') to req.user.
-            // This is what allows req.user.position to be available for RBAC.
+            
             done(null, user); 
         } else {
             // If the user's record is no longer in the DB, it indicates a problem or deleted account.
@@ -157,8 +146,7 @@ passport.use(
       callbackURL: process.env.GITHUB_CALLBACK_URI, // This needs to be correctly set on Render env vars AND GitHub OAuth App!
     },
     async function (accessToken, refreshToken, profile, done) {
-      // This is the first point after GitHub authentication where you get the 'profile' from GitHub.
-      // You MUST now find or create this user in YOUR OWN database.
+      
       try {
         
         const user = await userController.createOrFindUser(profile);
@@ -192,14 +180,11 @@ app.use('/', require('./routes'));
 app.use('/auth', authRoutes); // Your specific GitHub authentication routes (like /auth/github)
 
 
-// --- Database connection and server start ---
-// Ensure both Mongoose (db.mongoose.connect) and raw MongoDB driver (mongoDb.initDb)
-// are connected if your application uses both.
+
 db.mongoose.connect(db.url) // Connects Mongoose (e.g., if you have Mongoose models)
   .then(() => {
     console.log('Mongoose connected successfully!');
-    // If you use mongoDb.getDb().collection(...) in your controllers (e.g., for Basketball/Volleyball),
-    // you MUST initialize that connection as well.
+    
     mongoDb.initDb((err) => { 
         if (err) {
             console.error('Failed to initialize raw MongoDB connection:', err);
@@ -215,5 +200,5 @@ db.mongoose.connect(db.url) // Connects Mongoose (e.g., if you have Mongoose mod
   })
   .catch((err) => {
     console.error('Cannot connect to the database (Mongoose/MongoDB Atlas)!', err);
-    process.exit(1); // Exit if Mongoose connection fails
+    process.exit(1); 
   });
