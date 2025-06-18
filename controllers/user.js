@@ -1,136 +1,143 @@
-const db = require('../models');
-const User = db.user;
-const passwordUtil = require('../util/passwordComplexityCheck');
+require('dotenv').config();
+const express = require('express');
+const bodyParser = require('body-parser');
+const db = require('./models'); 
+const session = require('express-session');
+const passport = require('passport');
+const GitHubStrategy = require('passport-github2').Strategy;
+const cors = require('cors');
+const authRoutes = require('./routes/auth'); 
+const themeRoutes = require('./routes/theme'); // ✅ NEW: Import theme routes
+const swaggerUi = require('swagger-ui-express');
+const swaggerDocument = require('./swaggerDesign.json');
+const { isAuthenticated } = require('./middleware/auth'); 
+const mongoDb = require('./DB/connect.js'); 
+const userController = require('./controllers/user.js'); 
 
-module.exports.create = (req, res) => {
-  try {
-    if (!req.body.username || !req.body.password) {
-      return res.status(400).send({ message: 'Content can not be empty!' });
-    }
+const app = express();
+const port = process.env.PORT || 3000;
 
-    const password = req.body.password;
-    const passwordCheck = passwordUtil.passwordPass(password);
-    if (passwordCheck.error) {
-      return res.status(400).send({ message: passwordCheck.error });
-    }
+app.use(express.json());
+app.use(bodyParser.urlencoded({ extended: false }));
 
-    const user = new User(req.body);
-    user
-      .save()
-      .then((data) => {
-        console.log('User created successfully:', data);
-        res.status(201).send(data);
-      })
-      .catch((err) => {
-        console.error('User creation error:', err); // Full error output
-        res.status(500).send({
-          message: 'Some error occurred while creating the user.',
-          error: err.message,
-          details: err.errors || err // Log mongoose validation errors if present
-        });
-      });
-  } catch (err) {
-    console.error('Unexpected server error during user creation:', err);
-    res.status(500).json({ message: 'Internal server error', error: err });
+// ... your existing CORS and session setup remain unchanged
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+app.use((req, res, next) => {
+  console.log('🔍 Request received. Session ID:', req.sessionID);
+  console.log('🔍 Session Content:', req.session);
+  console.log('🔍 User (after Passport deserialize):', req.user);
+  next();
+});
+
+// --- Swagger UI ---
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
+// --- Public and auth routes ---
+app.get('/', (req, res) => {
+  const user = req.user;
+  if (user) {
+    res.send(`Logged in as ${user.displayName || user.username || user.id}. Your role is: ${user.position || 'N/A'}`);
+  } else {
+    res.send('Not logged in. Go to /auth/github to authenticate with GitHub.');
   }
-};
+});
 
-// No change needed in getAll, just improved logging
-module.exports.getAll = (req, res) => {
-  try {
-    User.find({})
-      .then((data) => {
-        res.status(200).send(data);
-      })
-      .catch((err) => {
-        console.error('Fetch all users error:', err);
-        res.status(500).send({
-          message: 'Some error occurred while retrieving users.',
-          error: err.message
-        });
-      });
-  } catch (err) {
-    res.status(500).json({ message: 'Internal server error', error: err });
-  }
-};
+app.get('/user/login', (req, res) => res.redirect('/auth/github'));
 
-// Improved error logging in getUser
-module.exports.getUser = (req, res) => {
-  try {
-    const username = req.params.username;
-    User.findOne({ username: username })
-      .then((data) => {
-        res.status(200).send(data);
-      })
-      .catch((err) => {
-        console.error('Fetch user error:', err);
-        res.status(500).send({
-          message: 'Some error occurred while retrieving the user.',
-          error: err.message
-        });
-      });
-  } catch (err) {
-    res.status(500).json({ message: 'Internal server error', error: err });
-  }
-};
-
-// Enhanced error handling in updateUser
-module.exports.updateUser = async (req, res) => {
-  try {
-    const username = req.params.username;
-    if (!username) {
-      return res.status(400).json({ message: 'Invalid Username Supplied' });
-    }
-
-    const password = req.body.password;
-    const passwordCheck = passwordUtil.passwordPass(password);
-    if (passwordCheck.error) {
-      return res.status(400).json({ message: passwordCheck.error });
-    }
-
-    // Use async/await instead of callback
-    const user = await User.findOne({ username: username });
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-
-    // Update fields
-    user.password = req.body.password;
-    user.displayName = req.body.displayName;
-    user.info = req.body.info;
-    user.profile = req.body.profile;
-
-    // Save updated user
-    const updatedUser = await user.save();
-
-    return res.status(200).json({ message: 'User updated successfully', user: updatedUser });
-  } catch (err) {
-    console.error('Unexpected error in updateUser:', err);
-    res.status(500).json({
-      message: 'Internal server error',
-      error: err.message || err
+app.get('/user/logout', (req, res, next) => {
+  req.logout(function(err) {
+    if (err) return next(err);
+    req.session.destroy(() => {
+      res.clearCookie('connect.sid');
+      res.redirect('/');
     });
-  }
-};
+  });
+});
 
+app.get('/check-session', (req, res) => {
+  res.json({
+    authenticated: req.isAuthenticated(),
+    user: req.user,
+    session: req.session
+  });
+});
 
-// No major change, added better error output
-module.exports.deleteUser = async (req, res) => {
+// --- GitHub Strategy ---
+passport.serializeUser((user, done) => done(null, user.username));
+passport.deserializeUser(async (username, done) => {
   try {
-    const username = req.params.username;
-    if (!username) {
-      return res.status(400).send({ message: 'Invalid Username Supplied' });
+    const dbInstance = mongoDb.getDb(); 
+    const user = await dbInstance.collection('User').findOne({ username: username });
+    if (user) {
+      done(null, user); 
+    } else {
+      console.warn(`User ${username} not found.`);
+      done(new Error('User not found'), null);
     }
-
-    const result = await User.deleteOne({ username });
-
-    if (result.deletedCount === 0) {
-      return res.status(404).send({ message: 'User not found' });
-    }
-
-    return res.status(204).send(); // No content, successful delete
   } catch (err) {
-    console.error('Delete error:', err);
-    return res.status(500).json({ message: 'Server error', error: err });
+    done(err, null);
   }
-};
+});
+
+passport.use(
+  new GitHubStrategy(
+    {
+      clientID: process.env.GITHUB_CLIENT_ID,
+      clientSecret: process.env.GITHUB_CLIENT_SECRET,
+      callbackURL: process.env.GITHUB_CALLBACK_URI,
+    },
+    async function (accessToken, refreshToken, profile, done) {
+      try {
+        const user = await userController.createOrFindUser(profile);
+        return done(null, user);
+      } catch (err) {
+        return done(err, null);
+      }
+    }
+  )
+);
+
+// --- Protected route ---
+app.get('/profile', isAuthenticated, (req, res) => {
+  const user = req.user;
+  res.status(200).json({
+    message: 'Welcome to your profile!',
+    user: {
+      id: user.id || user._id,
+      username: user.username,
+      displayName: user.displayName,
+      profileUrl: user.profileUrl,
+      photos: user.photos,
+      position: user.position || 'N/A'
+    },
+  });
+});
+
+// --- Main route usage ---
+app.use('/', require('./routes'));
+app.use('/auth', authRoutes);
+app.use('/theme', themeRoutes); // ✅ NEW: Mount theme routes here
+
+// --- Database startup ---
+db.mongoose.connect(db.url)
+  .then(() => {
+    console.log('Mongoose connected successfully!');
+    mongoDb.initDb((err) => {
+      if (err) {
+        console.error('MongoDB init error:', err);
+        process.exit(1);
+      } else {
+        console.log('Raw MongoDB connection initialized successfully.');
+        app.listen(port, () => {
+          console.log(`Server running on port ${port}`);
+        });
+      }
+    });
+  })
+  .catch((err) => {
+    console.error('Database connection failed:', err);
+    process.exit(1);
+  });
