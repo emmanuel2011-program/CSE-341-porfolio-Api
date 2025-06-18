@@ -8,21 +8,21 @@ router.get('/github', passport.authenticate('github', { scope: ['user:email'] })
 // Callback after GitHub login
 router.get(
   '/github/callback',
-  passport.authenticate('github', { failureRedirect: '/login-failure',
-    successRedirect: '/user/login/success' 
-  }),
-  (req, res) => {
-    req.session.save(() => {
-    // Successful authentication
-    res.redirect('/'); // Redirect to profile or dashboard
-  });
-}
+  passport.authenticate('github', {
+    failureRedirect: '/login-failure',
+    successRedirect: '/profile',
+    session: true
+  })
 );
 
 // Logout
-router.get('/logout', (req, res) => {
-  req.logout(() => {
-    res.redirect('/');
+router.get('/logout', (req, res, next) => {
+  req.logout(err => {
+    if (err) return next(err);
+    req.session.destroy(() => {
+      res.clearCookie('connect.sid'); // Clear session cookie
+      res.redirect('/');
+    });
   });
 });
 
