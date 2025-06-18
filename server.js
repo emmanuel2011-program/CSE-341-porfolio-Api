@@ -107,31 +107,24 @@ app.get('/check-session', (req, res) => {
 
 
 passport.serializeUser((user, done) => {
-
-    done(null, user.username); 
+  
+  done(null, user.id); 
 });
 
-// d
-passport.deserializeUser(async (username, done) => {
-    try {
-        // Retrieve your database connection instance.
-        const dbInstance = mongoDb.getDb();
-
-
-        const user = await dbInstance.collection('User').findOne({ username: username });
-
-        if (user) {
-
-            done(null, user);
-        } else {
-            // If the user's record is no longer in the DB, it indicates a problem or deleted account.
-            console.warn(`User ${username} not found in database during deserialization. Clearing session.`);
-            done(new Error('User record not found.'), null); // Passport will clear the session
-        }
-    } catch (err) {
-        console.error('Error deserializing user:', err);
-        done(err, null); // Pass the error to Passport
-    }
+passport.deserializeUser(async (id, done) => {
+  try {
+      
+      const user = await User.findById(id);
+      if (user) {
+          done(null, user); 
+      } else {
+          console.warn(`User with ID ${id} not found in database during deserialization. Clearing session.`);
+          
+      }
+  } catch (err) {
+      console.error('Error deserializing user:', err);
+      done(err); 
+  }
 });
 
 
