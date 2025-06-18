@@ -1,14 +1,14 @@
 const passport = require('passport');
-const GitHubStrategy = require('passport-github2').Strategy;
+const gitHubStrategy = require('passport-github2').Strategy;
 const db = require('../models');
 const User = db.user;
 
 passport.use(
-  new GitHubStrategy(
+  new gitHubStrategy(
     {
       clientID: process.env.GITHUB_CLIENT_ID,
       clientSecret: process.env.GITHUB_CLIENT_SECRET,
-      callbackURL: process.env.CALLBACK_URI || '/auth/github/callback'
+      callbackURL: '/auth/github/callback'
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
@@ -20,7 +20,6 @@ passport.use(
           username: profile.id,
           displayName: profile.displayName,
           email: profile.emails[0].value
-          
         });
         await newUser.save();
         done(null, newUser);

@@ -1,7 +1,6 @@
 const express = require('express')
 const router = express.Router();
-const passport = require('passport'); // <<< ADD THIS LINE
-const { isAuthenticated } = require('../middleware/auth');
+const passport = require('passport');
 
 router.use('/user', require('./user'));
 router.use('/theme', require('./theme'));

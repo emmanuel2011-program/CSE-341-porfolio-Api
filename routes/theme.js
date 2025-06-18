@@ -9,8 +9,9 @@ router.get('/', themeController.getAllThemes);
 router.get('/:themeName', themeController.getTheme);
 
 // Protected routes
-router.post('/', isAuthenticated, themeController.createTheme);
+router.post('/', validateThemeCreation, isAuthenticated, themeController.createTheme);
+
 router.put('/:themeName', isAuthenticated, themeController.updateTheme);
 router.delete('/:themeName', isAuthenticated, themeController.deleteTheme);
-router.post('/',validateThemeCreation, themeController.createTheme );
+
 module.exports = router;

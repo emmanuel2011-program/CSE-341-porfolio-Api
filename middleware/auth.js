@@ -1,29 +1,10 @@
-const express = require('express');
-const router = express.Router();
-const passport = require('passport');
+function isAuthenticated(req, res, next) {
+  if (req.isAuthenticated && req.isAuthenticated()) {
+    return next();
+  }
+  return res.status(401).json({ message: 'You dont have access' });
+}
 
-// Start GitHub OAuth flow
-router.get('/github', passport.authenticate('github', { scope: ['user:email'] }));
-
-// Callback after GitHub login
-router.get(
-  '/github/callback',
-  passport.authenticate('github', {
-    failureRedirect: '/login-failure',
-    successRedirect: '/profile', // Redirect to /profile on success
-    session: true
-  })
-);
-
-// Logout
-router.get('/logout', (req, res, next) => {
-  req.logout(err => {
-    if (err) return next(err);
-    req.session.destroy(() => {
-      res.clearCookie('connect.sid'); // Clear session cookie
-      res.redirect('/');
-    });
-  });
-});
-
-module.exports = router;
+module.exports = {
+  isAuthenticated
+};

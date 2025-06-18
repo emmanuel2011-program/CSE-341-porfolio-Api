@@ -2,7 +2,7 @@ const db = require('../models');
 const User = db.user; 
 const passwordUtil = require('../util/passwordComplexityCheck');
 
-module.exports.createOrFindUser = async (profile) => {
+/*module.exports.createOrFindUser = async (profile) => {
     console.log('--- Inside userController.createOrFindUser ---');
     console.log('  Profile received by createOrFindUser:', profile.id, profile.username, profile.displayName);
 
@@ -47,9 +47,7 @@ module.exports.createOrFindUser = async (profile) => {
         console.error('  createOrFindUser Stack trace:', error.stack);
         throw error; // Re-throw the error for the Passport strategy to catch
     }
-};
-
-
+}*/
 
 module.exports.create = (req, res) => {
     try {

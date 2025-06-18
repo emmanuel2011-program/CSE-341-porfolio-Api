@@ -1,6 +1,3 @@
-// validate.js
-
-// Helper function to send validation errors
 const validationError = (res, errors) => {
     return res.status(400).json({
         message: 'Validation failed',
@@ -18,18 +15,16 @@ const validateThemeCreation = (req, res, next) => {
     if (!color || typeof color !== 'string' || !/^#[0-9A-Fa-f]{6}$/.test(color)) {
         errors.push({ field: 'color', message: 'Color is required and must be a valid hex code (e.g., #RRGGBB).' });
     }
-    if (!layout || typeof layout !== 'string' || layout.trim() === '') { // Corrected layout check here too
-        // You might want to add a list of allowed layouts here, e.g., ['grid', 'full-width']
+    if (!layout || typeof layout !== 'string' || layout.trim() === '') {
         errors.push({ field: 'layout', message: 'Layout is required and must be a non-empty string.' });
     }
 
     if (errors.length > 0) {
         return validationError(res, errors);
     }
-    next(); // All good, proceed to controller
+    next();
 };
 
-// Validation for User Creation (based on your Swagger 'Credentials')
 const validateUserCreation = (req, res, next) => {
     const { username, password } = req.body;
     const errors = [];
@@ -45,15 +40,13 @@ const validateUserCreation = (req, res, next) => {
     } else if (password.length < 6) {
         errors.push({ field: 'password', message: 'Password must be at least 6 characters long.' });
     }
-    // You could add regex for password strength here, e.g., containing numbers, symbols, etc.
 
-    // === THIS IS THE CRUCIAL MISSING 'IF' STATEMENT ===
     if (errors.length > 0) {
         return validationError(res, errors);
     }
-    // === END OF CRUCIAL MISSING 'IF' STATEMENT ===
-    next(); // All good, proceed to controller
+    next();
 };
+console.log('typeof validateUserCreation:', typeof validateUserCreation);
 
 
 module.exports = {
