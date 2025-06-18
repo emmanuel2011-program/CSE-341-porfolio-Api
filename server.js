@@ -5,7 +5,10 @@ const cors = require('cors');
 const session = require('express-session');
 const passport = require('passport'); // FIX: This should import passport, not your config file
 const GitHubStrategy = require('passport-github2').Strategy; // FIX: Proper GitHub strategy package
-const db = require('./models'); // FIX: Add your database connection
+const db = require('./models');
+const swaggerUi = require('swagger-ui-express');
+const swaggerDocument = require('./swaggerDesign.json');
+// FIX: Add your database connection
 const routes = require('./routes/index.js');
 
 const port = process.env.PORT || 3000;
@@ -19,6 +22,9 @@ app.use(cors({
   methods: 'GET, POST, PUT, DELETE, OPTIONS',
   allowedHeaders: 'Origin, X-Requested-With, Content-Type, Accept, Z-key'
 }));
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
 
 app.use(session({
   secret: process.env.SESSION_SECRET || 'default_secret',
