@@ -83,7 +83,12 @@
           "500": {
             "description": "Error occurred while creating the theme"
           }
-        }
+        },
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ]
       }
     },
     "/theme/{themeName}": {
@@ -101,11 +106,6 @@
             "required": true,
             "type": "string"
             
-          }
-        ],
-        "security": [
-          {
-            "petstore_auth": ["write:pets", "read:pets"]
           }
         ],
         "responses": {
@@ -166,6 +166,12 @@
           }
         }
       },
+      "security": [
+          {
+            "cookieAuth": []
+          }
+        ]
+      },
       "delete": {
         "tags": ["theme"],
         "summary": "Delete a theme by name",
@@ -191,7 +197,12 @@
           "500": {
             "description": "Error deleting theme"
           }
-        }
+        },
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ]
       }
     },
       
@@ -320,7 +331,12 @@
           "404": {
             "description": "User not found"
           }
-        }
+        },
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ]
       },
       "delete": {
         "tags": ["user"],
@@ -347,7 +363,12 @@
           "404": {
             "description": "User not found"
           }
-        }
+        },
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ]
       }
     },
     "/user": {
@@ -411,20 +432,22 @@
           "500": {
             "description": "Error occurred while creating the user"
           }
-        }
+        },
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ]
       }
-    }
-  },
+    },
   "securityDefinitions": {
-    "petstore_auth": {
-      "type": "oauth2",
-      "authorizationUrl": "http://petstore.swagger.io/oauth/dialog",
-      "flow": "implicit",
-      "scopes": {
-        "write:pets": "modify pets in your account",
-        "read:pets": "read your pets"
-      }
+    "cookieAuth": {
+      "type": "apiKey",
+      "name": "connect.sid",
+      "in": "cookie",
+      "description": "This is the session cookie used for authentication. It is set when a user logs in and is used to maintain the user's session."
     }
+      
   },
   "definitions": {
     "User": {
