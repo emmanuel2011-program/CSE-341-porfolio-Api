@@ -9,10 +9,9 @@ const cors = require('cors');
 const authRoutes = require('./routes/auth');
 const swaggerUi = require('swagger-ui-express');
 const swaggerDocument = require('./swaggerDesign.json');
-
-// -
+// --- IMPORTANT: Import your MongoDB connection module ---
 const mongoDb = require('./DB/connect.js'); 
-
+const User = db.user;
 // --- IMPORTANT: Import the isAuthenticated middleware ---
 const { isAuthenticated } = require('./middleware/auth');
 
