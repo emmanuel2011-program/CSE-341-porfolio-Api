@@ -54,9 +54,10 @@ app.use(
     saveUninitialized: false, // Don't save empty sessions
     cookie: {
       secure: process.env.NODE_ENV === 'production', // Set to true in production (Render handles HTTPS)
-      httpOnly: true, // Prevents client-side JS from accessing the cookie
+      httpOnly: true, 
+      sameSite: 'none',
       maxAge: 24 * 60 * 60 * 1000 // 24 hours
-      // domain: '.yourdomain.com' // Only needed if your API and frontend are on different subdomains of the same parent domain
+      
     }
   })
 );
