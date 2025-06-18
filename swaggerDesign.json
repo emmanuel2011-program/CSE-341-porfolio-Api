@@ -204,8 +204,8 @@
           }
         ]
       }
-    },
-      
+    }
+   ,   
     "/user/login": {
       "get": {
         "tags": ["Not Yet Implemented"],
