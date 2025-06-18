@@ -30,7 +30,7 @@
   ],
   "schemes": ["https"],
   "paths": {
-    "/theme": { 
+    "/theme": {
       "get": {
         "tags": ["theme"],
         "summary": "Get all themes",
@@ -66,7 +66,7 @@
             "description": "Theme object to be created",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/ThemeInput" 
+              "$ref": "#/definitions/ThemeInput"
             }
           }
         ],
@@ -105,14 +105,13 @@
             "description": "Theme name string is required and functions as id",
             "required": true,
             "type": "string"
-            
           }
         ],
         "responses": {
           "200": {
             "description": "successful operation",
             "schema": {
-              "$ref": "#/definitions/Theme" 
+              "$ref": "#/definitions/Theme"
             }
           },
           "400": {
@@ -144,7 +143,7 @@
             "description": "Theme object with updated properties",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/ThemeInput" 
+              "$ref": "#/definitions/ThemeInput"
             }
           }
         ],
@@ -164,9 +163,8 @@
           "500": {
             "description": "Error updating theme"
           }
-        }
-      },
-      "security": [
+        },
+        "security": [
           {
             "cookieAuth": []
           }
@@ -204,8 +202,7 @@
           }
         ]
       }
-    }
-   ,   
+    },
     "/user/login": {
       "get": {
         "tags": ["Not Yet Implemented"],
@@ -439,7 +436,8 @@
           }
         ]
       }
-    },
+    }
+  },
   "securityDefinitions": {
     "cookieAuth": {
       "type": "apiKey",
@@ -447,7 +445,6 @@
       "in": "cookie",
       "description": "This is the session cookie used for authentication. It is set when a user logs in and is used to maintain the user's session."
     }
-      
   },
   "definitions": {
     "User": {
@@ -477,16 +474,16 @@
     },
     "Theme": {
       "type": "object",
-      "required": ["themeName", "color", "layout"], 
+      "required": ["themeName", "color", "layout"],
       "properties": {
-        "_id": { 
+        "_id": {
           "type": "string"
         },
-        "themeName": { 
+        "themeName": {
           "type": "string",
           "example": "Nike Theme"
         },
-        "color": { 
+        "color": {
           "type": "string",
           "example": "#000000"
         },
@@ -508,14 +505,14 @@
         },
         "colors": {
           "type": "array",
-          "example": ["#000", "#111", "#fff"], 
+          "example": ["#000", "#111", "#fff"],
           "items": {
             "type": "string"
           }
         }
       }
     },
-    "ThemeInput": { 
+    "ThemeInput": {
       "type": "object",
       "properties": {
         "themeName": { "type": "string", "example": "New Theme" },
@@ -573,8 +570,7 @@
           "items": {
             "type": "string"
           }
-        }
-        ,
+        },
         "dateStart": {
           "type": "string"
         },
