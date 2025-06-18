@@ -5,9 +5,9 @@
       "description": "API for managing users and themes for a portfolio builder application.",
       "version": "1.0.0"
     },
-    "host": "localhost:3000",
+    "host": "porfolio-kkg6.onrender.com",
     "basePath": "/",
-    "schemes": ["http"],
+    "schemes": ["https"],
     "consumes": ["application/json"],
     "produces": ["application/json"],
     "tags": [
