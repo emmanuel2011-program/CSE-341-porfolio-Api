@@ -1,10 +1,13 @@
 const express = require('express');
-const mongodb = require('./db/connect');
+const { initDb } = require('./db/connect'); // Correctly deconstructed initDb
 const cors = require('cors');
 const passport = require('passport');
 const session = require('express-session');
 const GitHubStrategy = require('passport-github2').Strategy;
 require('dotenv').config();
+
+// Assuming 'routes' is defined somewhere, e.g., const routes = require('./routes');
+const routes = require('./routes'); // <--- Make sure this line exists if routes is a separate file
 
 const port = process.env.PORT || 3000;
 const app = express();
@@ -31,7 +34,7 @@ app.use((req, res, next) => {
 
 app.use(cors());
 
-app.use('/', require('./routes'));
+app.use('/', routes); // This assumes your main routes are handled here
 
 passport.use(
   new GitHubStrategy(
@@ -71,7 +74,8 @@ app.get("/github/callback",
   }
 );
 
-mongodb.initDb((err) => {
+// CORRECTED LINE HERE
+initDb((err) => { // Directly call initDb, which was deconstructed from require
   if (err) {
     console.log(err);
   } else {
