@@ -19,6 +19,5 @@ const themeSchema = mongoose.Schema({ // Define schema directly
   }
 });
 
-// IMPORTANT: The model name here is 'Theme'. Mongoose will pluralize it to 'themes'
-// for the collection name, which matches your existing collection.
-module.exports = mongoose.model('Theme', themeSchema); // Export the Mongoose Model
+
+module.exports = mongoose.model('theme', themeSchema); // Export the Mongoose Model

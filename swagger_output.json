@@ -1,44 +1,43 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "Portfolio Builder API",
-    "description": "API for managing users and themes for a portfolio builder application.",
+    "title": "portfolio API",
+    "description": "API for building portfolio",
     "version": "1.0.0"
   },
-  "host": "porfolio-kkg6.onrender.com",
+  "host": "",
   "basePath": "/",
   "schemes": [
+    
     "https"
   ],
-  "consumes": [
-    "application/json"
-  ],
-  "produces": [
-    "application/json"
-  ],
-  "tags": [
-    {
-      "name": "user",
-      "description": "User management"
-    },
-    {
-      "name": "theme",
-      "description": "Theme management"
-    }
-  ],
   "paths": {
-    "/user": {
+    "/login": {
       "get": {
-        "tags": [
-          "user"
-        ],
-        "summary": "Get all users",
-        "produces": [
-          "application/json"
-        ],
+        "description": "",
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/logout": {
+      "get": {
+        "description": "",
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/user/": {
+      "get": {
+        "description": "",
         "responses": {
           "200": {
-            "description": "List of users"
+            "description": "OK"
           },
           "500": {
             "description": "Internal Server Error"
@@ -46,29 +45,33 @@
         }
       },
       "post": {
-        "tags": [
-          "user"
-        ],
-        "summary": "Create a new user",
+        "description": "",
         "parameters": [
           {
-            "in": "body",
             "name": "body",
-            "required": true,
+            "in": "body",
             "schema": {
-              "$ref": "#/definitions/User"
+              "type": "object",
+              "properties": {
+                "username": {
+                  "example": "any"
+                },
+                "password": {
+                  "example": "any"
+                }
+              }
             }
           }
         ],
         "responses": {
           "201": {
-            "description": "User created"
+            "description": "Created"
           },
           "400": {
             "description": "Bad Request"
           },
-          "422": {
-            "description": "Unprocessable Entity"
+          "401": {
+            "description": "Unauthorized"
           },
           "500": {
             "description": "Internal Server Error"
@@ -78,13 +81,7 @@
     },
     "/user/{username}": {
       "get": {
-        "tags": [
-          "user"
-        ],
-        "summary": "Get user by username",
-        "produces": [
-          "application/json"
-        ],
+        "description": "",
         "parameters": [
           {
             "name": "username",
@@ -95,10 +92,7 @@
         ],
         "responses": {
           "200": {
-            "description": "User details"
-          },
-          "404": {
-            "description": "User not found"
+            "description": "OK"
           },
           "500": {
             "description": "Internal Server Error"
@@ -106,10 +100,7 @@
         }
       },
       "put": {
-        "tags": [
-          "user"
-        ],
-        "summary": "Update user",
+        "description": "",
         "parameters": [
           {
             "name": "username",
@@ -118,26 +109,39 @@
             "type": "string"
           },
           {
-            "in": "body",
             "name": "body",
-            "required": true,
+            "in": "body",
             "schema": {
-              "$ref": "#/definitions/User"
+              "type": "object",
+              "properties": {
+                "password": {
+                  "example": "any"
+                },
+                "displayName": {
+                  "example": "any"
+                },
+                "info": {
+                  "example": "any"
+                },
+                "profile": {
+                  "example": "any"
+                }
+              }
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "User updated"
+            "description": "OK"
           },
           "400": {
             "description": "Bad Request"
           },
+          "401": {
+            "description": "Unauthorized"
+          },
           "404": {
             "description": "Not Found"
-          },
-          "422": {
-            "description": "Unprocessable Entity"
           },
           "500": {
             "description": "Internal Server Error"
@@ -145,10 +149,7 @@
         }
       },
       "delete": {
-        "tags": [
-          "user"
-        ],
-        "summary": "Delete user",
+        "description": "",
         "parameters": [
           {
             "name": "username",
@@ -158,11 +159,14 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "User deleted"
+          "204": {
+            "description": "No Content"
           },
           "400": {
             "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
           },
           "404": {
             "description": "Not Found"
@@ -173,18 +177,12 @@
         }
       }
     },
-    "/theme": {
+    "/theme/": {
       "get": {
-        "tags": [
-          "theme"
-        ],
-        "summary": "Get all themes",
-        "produces": [
-          "application/json"
-        ],
+        "description": "",
         "responses": {
           "200": {
-            "description": "List of themes"
+            "description": "OK"
           },
           "500": {
             "description": "Internal Server Error"
@@ -192,29 +190,36 @@
         }
       },
       "post": {
-        "tags": [
-          "theme"
-        ],
-        "summary": "Create a new theme",
+        "description": "",
         "parameters": [
           {
-            "in": "body",
             "name": "body",
-            "required": true,
+            "in": "body",
             "schema": {
-              "$ref": "#/definitions/Theme"
+              "type": "object",
+              "properties": {
+                "themeName": {
+                  "example": "any"
+                },
+                "color": {
+                  "example": "any"
+                },
+                "layout": {
+                  "example": "any"
+                }
+              }
             }
           }
         ],
         "responses": {
           "201": {
-            "description": "Theme created"
+            "description": "Created"
           },
           "400": {
             "description": "Bad Request"
           },
-          "422": {
-            "description": "Unprocessable Entity"
+          "401": {
+            "description": "Unauthorized"
           },
           "500": {
             "description": "Internal Server Error"
@@ -224,13 +229,7 @@
     },
     "/theme/{themeName}": {
       "get": {
-        "tags": [
-          "theme"
-        ],
-        "summary": "Get theme by name",
-        "produces": [
-          "application/json"
-        ],
+        "description": "",
         "parameters": [
           {
             "name": "themeName",
@@ -241,10 +240,10 @@
         ],
         "responses": {
           "200": {
-            "description": "Theme details"
+            "description": "OK"
           },
           "404": {
-            "description": "Theme not found"
+            "description": "Not Found"
           },
           "500": {
             "description": "Internal Server Error"
@@ -252,38 +251,27 @@
         }
       },
       "put": {
-        "tags": [
-          "theme"
-        ],
-        "summary": "Update theme",
+        "description": "",
         "parameters": [
           {
             "name": "themeName",
             "in": "path",
             "required": true,
             "type": "string"
-          },
-          {
-            "in": "body",
-            "name": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/Theme"
-            }
           }
         ],
         "responses": {
           "200": {
-            "description": "Theme updated"
+            "description": "OK"
           },
           "400": {
             "description": "Bad Request"
           },
+          "401": {
+            "description": "Unauthorized"
+          },
           "404": {
             "description": "Not Found"
-          },
-          "422": {
-            "description": "Unprocessable Entity"
           },
           "500": {
             "description": "Internal Server Error"
@@ -291,10 +279,7 @@
         }
       },
       "delete": {
-        "tags": [
-          "theme"
-        ],
-        "summary": "Delete theme",
+        "description": "",
         "parameters": [
           {
             "name": "themeName",
@@ -305,10 +290,10 @@
         ],
         "responses": {
           "200": {
-            "description": "Theme deleted"
+            "description": "OK"
           },
-          "400": {
-            "description": "Bad Request"
+          "401": {
+            "description": "Unauthorized"
           },
           "404": {
             "description": "Not Found"
@@ -316,68 +301,6 @@
           "500": {
             "description": "Internal Server Error"
           }
-        }
-      }
-    }
-  },
-  "definitions": {
-    "User": {
-      "type": "object",
-      "required": [
-        "username",
-        "password"
-      ],
-      "properties": {
-        "username": {
-          "type": "string",
-          "example": "johndoe"
-        },
-        "password": {
-          "type": "string",
-          "example": "securepassword123"
-        },
-        "displayName": {
-          "type": "string",
-          "example": "John Doe"
-        }
-      }
-    },
-    "Theme": {
-      "type": "object",
-      "required": [
-        "name",
-        "fontFamily",
-        "fontSize",
-        "colors"
-      ],
-      "properties": {
-        "name": {
-          "type": "string",
-          "example": "Modern Minimalist"
-        },
-        "fontFamily": {
-          "type": "string",
-          "example": "Roboto"
-        },
-        "fontSize": {
-          "type": "integer",
-          "example": 16
-        },
-        "inspiration": {
-          "type": "string",
-          "example": "Clean lines and subtle colors."
-        },
-        "colors": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "example": [
-            "#FFFFFF",
-            "#F0F0F0",
-            "#333333",
-            "#007BFF"
-          ]
         }
       }
     }

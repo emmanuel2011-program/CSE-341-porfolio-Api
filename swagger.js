@@ -6,7 +6,7 @@ const doc = {
         description: 'API for building portfolio',
     },
     host: 'localhost:3000',
-    schemes: ['http'],
+    schemes: ['http', 'https'],
     }
 
 const outputFile = './swagger_output.json';
