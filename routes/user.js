@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
 
-const userController = require('../controllers/user');
-const { isAuthenticated } = require('../middleware/auth');
-const { validateUserCreation } = require('../middleware/validate.js');
+const userController = require('../controllers/user.js');
+const { isAuthenticated } = require('../middleware/authenticate.js'); // Assuming you have an auth middleware
+const { validateUserCreation } = require('../validator/valdator.js');
 
 // Public Routes
 router.get('/', userController.getAll);

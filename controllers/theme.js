@@ -1,5 +1,5 @@
-const db = require('../models');
-const Theme = db.theme;
+const MongoDb = require('../db/connect');
+const ObjectId = require('mongodb').ObjectId;
 
 // Create a new theme
 exports.createTheme = async (req, res) => {

@@ -1,6 +1,5 @@
-const db = require('../models');
-const User = db.user; 
-const passwordUtil = require('../util/passwordComplexityCheck');
+const MongoDb = require('../db/connect.js');
+const ObjectId = require('mongodb').ObjectId;
 
 /*module.exports.createOrFindUser = async (profile) => {
     console.log('--- Inside userController.createOrFindUser ---');
