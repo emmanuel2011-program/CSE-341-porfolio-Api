@@ -1,5 +1,6 @@
 const MongoDb = require('../db/connect.js');
 const ObjectId = require('mongodb').ObjectId;
+const User = require('../models/user');
 
 /*module.exports.createOrFindUser = async (profile) => {
     console.log('--- Inside userController.createOrFindUser ---');
