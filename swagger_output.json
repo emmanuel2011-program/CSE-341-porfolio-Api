@@ -81,7 +81,7 @@
     },
     "/user/{username}": {
       "get": {
-        "description": "",
+        "description": "userbyuserName",
         "parameters": [
           {
             "name": "username",
@@ -100,7 +100,7 @@
         }
       },
       "put": {
-        "description": "",
+        "description": "Update user by username",
         "parameters": [
           {
             "name": "username",
@@ -149,7 +149,7 @@
         }
       },
       "delete": {
-        "description": "",
+        "description": "Delete user by username",
         "parameters": [
           {
             "name": "username",
@@ -229,7 +229,7 @@
     },
     "/theme/{themeName}": {
       "get": {
-        "description": "",
+        "description": "Theme by themeName",
         "parameters": [
           {
             "name": "themeName",
@@ -251,7 +251,7 @@
         }
       },
       "put": {
-        "description": "",
+        "description": "Update theme by themeName",
         "parameters": [
           {
             "name": "themeName",

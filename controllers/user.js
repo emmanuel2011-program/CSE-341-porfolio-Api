@@ -2,178 +2,203 @@ const MongoDb = require('../db/connect.js');
 const ObjectId = require('mongodb').ObjectId;
 const User = require('../models/user');
 
-/*module.exports.createOrFindUser = async (profile) => {
-    console.log('--- Inside userController.createOrFindUser ---');
-    console.log('  Profile received by createOrFindUser:', profile.id, profile.username, profile.displayName);
-
-    try {
-        // 1. Try to find the user by their GitHub ID
-        let user = await User.findOne({ githubId: profile.id });
-
-        if (user) {
-            console.log('  User found in DB for GitHub ID:', profile.id, 'Username:', user.username);
-            // Optionally, update existing user info like last login or display name if it changed on GitHub
-            user.lastLogin = new Date();
-            if (profile.displayName && user.displayName !== profile.displayName) {
-                user.displayName = profile.displayName;
-            }
-           
-            await user.save(); // Save any updates
-            return user;
-        }
-
-        
-        console.log('  User not found, creating new user for GitHub ID:', profile.id);
-
-        const newUser = new User({
-            githubId: profile.id,
-            username: profile.username, // GitHub username
-            displayName: profile.displayName || profile.username,
-            profileUrl: profile.profileUrl,
-            
-            photos: profile.photos && profile.photos.length > 0 ? profile.photos[0].value : null,
-            createdAt: new Date(),
-            // Initialize nested objects if your schema requires them
-            info: {},
-            profile: {}
-        });
-
-        const savedUser = await newUser.save();
-        console.log('  New user created successfully:', savedUser.username || savedUser._id);
-        return savedUser;
-
-    } catch (error) {
-        console.error('  ERROR in createOrFindUser:', error.message);
-        console.error('  createOrFindUser Stack trace:', error.stack);
-        throw error; // Re-throw the error for the Passport strategy to catch
+exports.create = async (req, res) => {
+  try {
+    if (!req.body.username || !req.body.password || !req.body.email) {
+      return res.status(400).send({ message: 'Missing required fields: username, password, and email are required!' });
     }
-}*/
 
-module.exports.create = (req, res) => {
-    try {
-        if (!req.body.username || !req.body.password) {
-            return res.status(400).send({ message: 'Content can not be empty!' });
-        }
-
-        const password = req.body.password;
-        const passwordCheck = passwordUtil.passwordPass(password);
-        if (passwordCheck.error) {
-            return res.status(400).send({ message: passwordCheck.error });
-        }
-
-        const user = new User(req.body);
-        user
-            .save()
-            .then((data) => {
-                console.log('User created successfully:', data);
-                res.status(201).send(data);
-            })
-            .catch((err) => {
-                console.error('User creation error:', err);
-                res.status(500).send({
-                    message: 'Some error occurred while creating the user.',
-                    error: err.message,
-                    details: err.errors || err
-                });
-            });
-    } catch (err) {
-        console.error('Unexpected server error during user creation:', err);
-        res.status(500).json({ message: 'Internal server error', error: err });
+    const passwordCheck = passwordUtil.passwordPass(req.body.password);
+    if (passwordCheck.error) {
+      return res.status(422).send({ message: passwordCheck.error });
     }
-};
 
-module.exports.getAll = (req, res) => {
-    try {
-        User.find({})
-            .then((data) => {
-                res.status(200).send(data);
-            })
-            .catch((err) => {
-                console.error('Fetch all users error:', err);
-                res.status(500).send({
-                    message: 'Some error occurred while retrieving users.',
-                    error: err.message
-                });
-            });
-    } catch (err) {
-        res.status(500).json({ message: 'Internal server error', error: err });
+    if (req.body.email && !/.+@.+\..+/.test(req.body.email)) {
+      return res.status(422).send({ message: 'Invalid email format.' });
     }
-};
-
-module.exports.getUser = (req, res) => {
-    try {
-        const username = req.params.username;
-        User.findOne({ username: username })
-            .then((data) => {
-                res.status(200).send(data);
-            })
-            .catch((err) => {
-                console.error('Fetch user error:', err);
-                res.status(500).send({
-                    message: 'Some error occurred while retrieving the user.',
-                    error: err.message
-                });
-            });
-    } catch (err) {
-        res.status(500).json({ message: 'Internal server error', error: err });
+    if (req.body.phoneNumber && !/^\+?[0-9]{7,15}$/.test(req.body.phoneNumber)) {
+        return res.status(422).send({ message: 'Invalid phone number format. Use international format, e.g., +2348012345678.' });
     }
-};
+    if (req.body.openToNewOpportunities !== undefined && typeof req.body.openToNewOpportunities !== 'boolean') {
+        return res.status(422).send({ message: 'openToNewOpportunities must be a boolean.' });
+    }
+    if (req.body.profileIsPublic !== undefined && typeof req.body.profileIsPublic !== 'boolean') {
+        return res.status(422).send({ message: 'profileIsPublic must be a boolean.' });
+    }
 
-module.exports.updateUser = async (req, res) => {
-    try {
-        const username = req.params.username;
-        if (!username) {
-            return res.status(400).json({ message: 'Invalid Username Supplied' });
-        }
+    const user = new User({
+        username: req.body.username,
+        password: req.body.password,
+        displayName: req.body.displayName || req.body.username,
+        email: req.body.email,
+        phoneNumber: req.body.phoneNumber || '',
+        currentLocation: req.body.currentLocation || '',
+        openToNewOpportunities: req.body.openToNewOpportunities !== undefined ? req.body.openToNewOpportunities : true,
+        profileIsPublic: req.body.profileIsPublic !== undefined ? req.body.profileIsPublic : true,
+        theme_name: req.body.theme_name || 'Default',
+        info: req.body.info || {},
+        profile: req.body.profile || {}
+    });
 
-        const password = req.body.password;
-        // Check if password exists in body before validating
-        if (password) {
-            const passwordCheck = passwordUtil.passwordPass(password);
-            if (passwordCheck.error) {
-                return res.status(400).json({ message: passwordCheck.error });
-            }
-        }
+    const data = await user.save();
+    console.log('User created successfully:', data.username);
+    res.status(201).send(data);
+  } catch (err) {
+    console.error('User creation error:', err);
+    if (err.code === 11000) {
+      let duplicateField = 'A field';
+      if (err.message.includes('username')) duplicateField = 'Username';
+      else if (err.message.includes('email')) duplicateField = 'Email';
 
-        const user = await User.findOne({ username: username });
-        if (!user) {
-            return res.status(404).json({ message: 'User not found' });
-        }
-
-        // Update fields only if they are provided in the request body
-        if (req.body.password) user.password = req.body.password;
-        if (req.body.displayName) user.displayName = req.body.displayName;
-        if (req.body.info) user.info = req.body.info;
-        if (req.body.profile) user.profile = req.body.profile;
-
-        const updatedUser = await user.save();
-
-        return res.status(200).json({ message: 'User updated successfully', user: updatedUser });
-    } catch (err) {
-        console.error('Unexpected error in updateUser:', err);
-        res.status(500).json({
-            message: 'Internal server error',
-            error: err.message || err
+      return res.status(409).send({
+        message: `${duplicateField} already exists.`,
+        error: err.message
+      });
+    }
+    if (err.name === 'ValidationError') {
+        return res.status(422).send({
+            message: 'Validation failed for user creation.',
+            errors: Object.values(err.errors).map(e => e.message)
         });
     }
+    res.status(500).send({
+      message: 'Some error occurred while creating the user.',
+      error: err.message,
+      details: err.errors || err
+    });
+  }
 };
 
-module.exports.deleteUser = async (req, res) => {
-    try {
-        const username = req.params.username;
-        if (!username) {
-            return res.status(400).send({ message: 'Invalid Username Supplied' });
-        }
+exports.getAll = async (req, res) => {
+  try {
+    const data = await User.find({});
+    res.status(200).send(data);
+  } catch (err) {
+    console.error('Fetch all users error:', err);
+    res.status(500).send({
+      message: 'Some error occurred while retrieving users.',
+      error: err.message
+    });
+  }
+};
 
-        const result = await User.deleteOne({ username });
+exports.getUser = async (req, res) => {
+  const { username } = req.params;
 
-        if (result.deletedCount === 0) {
-            return res.status(404).send({ message: 'User not found' });
-        }
+  try {
+    const data = await User.findOne({ username: username });
 
-        return res.status(204).send();
-    } catch (err) {
-        console.error('Delete error:', err);
-        return res.status(500).json({ message: 'Server error', error: err });
+    if (!data) {
+      return res.status(404).send({ message: 'User not found with username: ' + username });
     }
+
+    res.status(200).send(data);
+  } catch (err) {
+    console.error('Fetch user error:', err);
+    res.status(500).send({
+      message: 'Error retrieving user with username=' + username,
+      error: err.message
+    });
+  }
+};
+
+exports.updateUser = async (req, res) => {
+  const { username } = req.params;
+
+  if (!req.body || Object.keys(req.body).length === 0) {
+    return res.status(400).send({ message: 'Update data cannot be empty.' });
+  }
+
+  try {
+    const user = await User.findOne({ username: username });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found with username: ' + username });
+    }
+
+    if (req.body.password !== undefined) {
+      const passwordCheck = passwordUtil.passwordPass(req.body.password);
+      if (passwordCheck.error) {
+        return res.status(422).json({ message: passwordCheck.error });
+      }
+      user.password = req.body.password;
+    }
+
+    if (req.body.displayName !== undefined) user.displayName = req.body.displayName;
+    if (req.body.email !== undefined) {
+        if (!/.+@.+\..+/.test(req.body.email)) {
+            return res.status(422).send({ message: 'Invalid email format for update.' });
+        }
+        user.email = req.body.email;
+    }
+    if (req.body.phoneNumber !== undefined) {
+        if (!/^\+?[0-9]{7,15}$/.test(req.body.phoneNumber)) {
+            return res.status(422).send({ message: 'Invalid phone number format for update. Use international format, e.g., +2348012345678.' });
+        }
+        user.phoneNumber = req.body.phoneNumber;
+    }
+    if (req.body.currentLocation !== undefined) user.currentLocation = req.body.currentLocation;
+
+    if (req.body.openToNewOpportunities !== undefined) {
+        if (typeof req.body.openToNewOpportunities !== 'boolean') {
+            return res.status(422).send({ message: 'openToNewOpportunities must be a boolean for update.' });
+        }
+        user.openToNewOpportunities = req.body.openToNewOpportunities;
+    }
+    if (req.body.profileIsPublic !== undefined) {
+        if (typeof req.body.profileIsPublic !== 'boolean') {
+            return res.status(422).send({ message: 'profileIsPublic must be a boolean for update.' });
+        }
+        user.profileIsPublic = req.body.profileIsPublic;
+    }
+    if (req.body.theme_name !== undefined) user.theme_name = req.body.theme_name;
+
+    if (req.body.info !== undefined) user.info = req.body.info;
+    if (req.body.profile !== undefined) user.profile = req.body.profile;
+
+    const updatedUser = await user.save();
+
+    return res.status(200).json({ message: 'User updated successfully', user: updatedUser });
+  } catch (err) {
+    console.error('Error updating user:', err);
+    if (err.code === 11000) {
+        let duplicateField = 'A field';
+        if (err.message.includes('username')) duplicateField = 'Username';
+        else if (err.message.includes('email')) duplicateField = 'Email';
+        return res.status(409).send({
+            message: `${duplicateField} already exists with that value.`,
+            error: err.message
+        });
+    }
+    if (err.name === 'ValidationError') {
+        return res.status(422).send({
+            message: 'Validation failed for user update.',
+            errors: Object.values(err.errors).map(e => e.message)
+        });
+    }
+    res.status(500).json({
+      message: 'Internal server error while updating user with username=' + username,
+      error: err.message || err
+    });
+  }
+};
+
+exports.deleteUser = async (req, res) => {
+  const { username } = req.params;
+
+  try {
+    const result = await User.deleteOne({ username: username });
+
+    if (result.deletedCount === 0) {
+      return res.status(404).send({ message: 'User not found with username: ' + username });
+    }
+
+    res.status(204).send();
+  } catch (err) {
+    console.error('Delete user error:', err);
+    return res.status(500).json({
+      message: 'Could not delete user with username=' + username,
+      error: err.message || err
+    });
+  }
 };

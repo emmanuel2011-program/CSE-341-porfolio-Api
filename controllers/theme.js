@@ -11,8 +11,11 @@ exports.createTheme = async (req, res) => {
   try {
     const theme = new Theme({
       themeName: req.body.themeName,
-      color: req.body.color,
-      layout: req.body.layout
+        color: req.body.color || '#FFFFFF', // Default to white if not provided
+        fontSize: req.body.fontSize || '16px', // Default to 16px if not provided
+        fontFamily: req.body.fontFamily || 'Arial, sans-serif', // Default to Arial if not provided
+        inspiration: req.body.inspiration || 'No inspiration provided',
+        colors: req.body.colors || ['#FFFFFF', '#000000'] // Default to white
     });
 
     const data = await theme.save();
