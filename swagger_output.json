@@ -1,189 +1,385 @@
 {
-    "swagger": "2.0",
-    "info": {
-      "title": "Portfolio Builder API",
-      "description": "API for managing users and themes for a portfolio builder application.",
-      "version": "1.0.0"
+  "swagger": "2.0",
+  "info": {
+    "title": "Portfolio Builder API",
+    "description": "API for managing users and themes for a portfolio builder application.",
+    "version": "1.0.0"
+  },
+  "host": "porfolio-kkg6.onrender.com",
+  "basePath": "/",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "tags": [
+    {
+      "name": "user",
+      "description": "User management"
     },
-    "host": "porfolio-kkg6.onrender.com",
-    "basePath": "/",
-    "schemes": ["https"],
-    "consumes": ["application/json"],
-    "produces": ["application/json"],
-    "tags": [
-      { "name": "user", "description": "User management" },
-      { "name": "theme", "description": "Theme management" }
-    ],
-    "paths": {
-      "/user": {
-        "get": {
-          "tags": ["user"],
-          "summary": "Get all users",
-          "responses": {
-            "200": { "description": "List of users" }
+    {
+      "name": "theme",
+      "description": "Theme management"
+    }
+  ],
+  "paths": {
+    "/user": {
+      "get": {
+        "tags": [
+          "user"
+        ],
+        "summary": "Get all users",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "List of users"
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
-        },
-        "post": {
-          "tags": ["user"],
-          "summary": "Create a new user",
-          "parameters": [{
+        }
+      },
+      "post": {
+        "tags": [
+          "user"
+        ],
+        "summary": "Create a new user",
+        "parameters": [
+          {
             "in": "body",
             "name": "body",
             "required": true,
-            "schema": { "$ref": "#/definitions/User" }
-          }],
-          "responses": {
-            "201": { "description": "User created" }
-          }
-        }
-      },
-      "/user/{username}": {
-        "get": {
-          "tags": ["user"],
-          "summary": "Get user by username",
-          "parameters": [{
-            "name": "username",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }],
-          "responses": {
-            "200": { "description": "User details" },
-            "404": { "description": "User not found" }
-          }
-        },
-        "put": {
-          "tags": ["user"],
-          "summary": "Update user",
-          "parameters": [
-            {
-              "name": "username",
-              "in": "path",
-              "required": true,
-              "type": "string"
-            },
-            {
-              "in": "body",
-              "name": "body",
-              "required": true,
-              "schema": { "$ref": "#/definitions/User" }
+            "schema": {
+              "$ref": "#/definitions/User"
             }
-          ],
-          "responses": {
-            "204": { "description": "User updated" }
           }
-        },
-        "delete": {
-          "tags": ["user"],
-          "summary": "Delete user",
-          "parameters": [{
-            "name": "username",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }],
-          "responses": {
-            "204": { "description": "User deleted" }
-          }
-        }
-      },
-      "/theme": {
-        "get": {
-          "tags": ["theme"],
-          "summary": "Get all themes",
-          "responses": {
-            "200": { "description": "List of themes" }
-          }
-        },
-        "post": {
-          "tags": ["theme"],
-          "summary": "Create a new theme",
-          "parameters": [{
-            "in": "body",
-            "name": "body",
-            "required": true,
-            "schema": { "$ref": "#/definitions/Theme" }
-          }],
-          "responses": {
-            "201": { "description": "Theme created" }
-          }
-        }
-      },
-      "/theme/{themeName}": {
-        "get": {
-          "tags": ["theme"],
-          "summary": "Get theme by name",
-          "parameters": [{
-            "name": "themeName",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }],
-          "responses": {
-            "200": { "description": "Theme details" },
-            "404": { "description": "Theme not found" }
-          }
-        },
-        "put": {
-          "tags": ["theme"],
-          "summary": "Update theme",
-          "parameters": [
-            {
-              "name": "themeName",
-              "in": "path",
-              "required": true,
-              "type": "string"
-            },
-            {
-              "in": "body",
-              "name": "body",
-              "required": true,
-              "schema": { "$ref": "#/definitions/Theme" }
-            }
-          ],
-          "responses": {
-            "204": { "description": "Theme updated" }
-          }
-        },
-        "delete": {
-          "tags": ["theme"],
-          "summary": "Delete theme",
-          "parameters": [{
-            "name": "themeName",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }],
-          "responses": {
-            "204": { "description": "Theme deleted" }
+        ],
+        "responses": {
+          "201": {
+            "description": "User created"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "422": {
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         }
       }
     },
-    "definitions": {
-      "User": {
-        "type": "object",
-        "required": ["username", "password"],
-        "properties": {
-          "username": { "type": "string" },
-          "password": { "type": "string" },
-          "displayName": { "type": "string" }
+    "/user/{username}": {
+      "get": {
+        "tags": [
+          "user"
+        ],
+        "summary": "Get user by username",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "username",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User details"
+          },
+          "404": {
+            "description": "User not found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
         }
       },
-      "Theme": {
-        "type": "object",
-        "required": ["name", "fontFamily", "fontSize", "colors"],
-        "properties": {
-          "name": { "type": "string" },
-          "fontFamily": { "type": "string" },
-          "fontSize": { "type": "integer" },
-          "inspiration": { "type": "string" },
-          "colors": {
-            "type": "array",
-            "items": { "type": "string" }
+      "put": {
+        "tags": [
+          "user"
+        ],
+        "summary": "Update user",
+        "parameters": [
+          {
+            "name": "username",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/User"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User updated"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "422": {
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "user"
+        ],
+        "summary": "Delete user",
+        "parameters": [
+          {
+            "name": "username",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User deleted"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/theme": {
+      "get": {
+        "tags": [
+          "theme"
+        ],
+        "summary": "Get all themes",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "List of themes"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "theme"
+        ],
+        "summary": "Create a new theme",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Theme"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Theme created"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "422": {
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/theme/{themeName}": {
+      "get": {
+        "tags": [
+          "theme"
+        ],
+        "summary": "Get theme by name",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "themeName",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Theme details"
+          },
+          "404": {
+            "description": "Theme not found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "theme"
+        ],
+        "summary": "Update theme",
+        "parameters": [
+          {
+            "name": "themeName",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Theme"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Theme updated"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "422": {
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "theme"
+        ],
+        "summary": "Delete theme",
+        "parameters": [
+          {
+            "name": "themeName",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Theme deleted"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         }
       }
     }
+  },
+  "definitions": {
+    "User": {
+      "type": "object",
+      "required": [
+        "username",
+        "password"
+      ],
+      "properties": {
+        "username": {
+          "type": "string",
+          "example": "johndoe"
+        },
+        "password": {
+          "type": "string",
+          "example": "securepassword123"
+        },
+        "displayName": {
+          "type": "string",
+          "example": "John Doe"
+        }
+      }
+    },
+    "Theme": {
+      "type": "object",
+      "required": [
+        "name",
+        "fontFamily",
+        "fontSize",
+        "colors"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "example": "Modern Minimalist"
+        },
+        "fontFamily": {
+          "type": "string",
+          "example": "Roboto"
+        },
+        "fontSize": {
+          "type": "integer",
+          "example": 16
+        },
+        "inspiration": {
+          "type": "string",
+          "example": "Clean lines and subtle colors."
+        },
+        "colors": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "example": [
+            "#FFFFFF",
+            "#F0F0F0",
+            "#333333",
+            "#007BFF"
+          ]
+        }
+      }
+    }
   }
-  
+}
